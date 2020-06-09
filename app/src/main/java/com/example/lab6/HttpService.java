@@ -29,21 +29,16 @@ public class HttpService extends IntentService {
     public static final int POST = 2;
     public static final int PUT = 3;
 
-    //Create constructor
     public HttpService() {
-        //Parent Constructor
         super("HTTP calls handler");
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
         try {
-            //Create url object from given string
             String urlstr = intent.getStringExtra(HttpService.URL);
             URL url = new URL(urlstr);
-            //Prepare connection
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            //set connection method
             switch (intent.getIntExtra(HttpService.METHOD,1)){
                 case HttpService.POST:
                     conn.setRequestMethod("POST");
@@ -54,12 +49,10 @@ public class HttpService extends IntentService {
                 default:
                     conn.setRequestMethod("GET");
             }
-            //Using RSA asynhronic sign for authorization request
             Config conf = new Config(getApplicationContext());
             conn.setRequestProperty("PKEY", conf.getPublic().replace("\n",""));
             conn.setRequestProperty("SIGN", conf.sign(urlstr).replace("\n",""));
 
-            //Add parameters to request
             String params = intent.getStringExtra(HttpService.PARAMS);
             if(params!=null) {
                 conn.setDoOutput(true);
@@ -68,35 +61,28 @@ public class HttpService extends IntentService {
                 writer.flush();
                 writer.close();
             }
-            //send request
             conn.connect();
 
-            //Getting HTTP responseCode
             int responseCode = conn.getResponseCode();
 
-            //Geting response Body only when connection is OK
             String response = "";
             if(responseCode==200) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
-                //Convert response to single string
                 String line;
                 while ((line = reader.readLine()) != null) {
                     response += line;
                 }
                 reader.close();
             }
-            //Close connection
             conn.disconnect();
 
-            //Add response to return intent
             Intent returns = new Intent();
             returns.putExtra(HttpService.RESPONSE, response);
             PendingIntent reply = intent.getParcelableExtra(HttpService.RETURN);
             reply.send(this, responseCode, returns);
 
         }catch (Exception ex){
-            //If connection error occured - show Exception message in logCat
             Log.d("CONNERROR", ex.toString());
         }
     }

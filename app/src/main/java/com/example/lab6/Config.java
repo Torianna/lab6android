@@ -26,7 +26,7 @@ public class Config extends SQLiteOpenHelper {
                 null, DATABASE_VERSION);
     }
 
-    @Override //Creating new table config contains private and public key
+    @Override
     public void onCreate(SQLiteDatabase database) {
         String DATABASE_CREATE =
                 "create table config " +
@@ -35,23 +35,16 @@ public class Config extends SQLiteOpenHelper {
                         "pubKey string not null);";
 
         database.execSQL(DATABASE_CREATE);
-        //Fill config database
         addKeys(database);
     }
-
-    //method adding initial values to database
     private void addKeys(SQLiteDatabase db) {
-        //Generate 2 RSA keys
         KeyPair keys = generateKeys();
         ContentValues values = new ContentValues();
-        //Adding Keys into database
         values.put("privKey", keys.getPrivate().getEncoded());
-        //Encode Key as String to sending this into Serwer
         values.put("pubKey", Base64.encodeToString(keys.getPublic().getEncoded(), Base64.DEFAULT));
         db.insert("config", null, values);
     }
 
-    //Getting private RSA key as PrivateKey object for async cryptography
     private PrivateKey getPrivate(){
         SQLiteDatabase db =
                 this.getReadableDatabase();
@@ -63,7 +56,6 @@ public class Config extends SQLiteOpenHelper {
                         null,null);
         if (cursor != null)
             cursor.moveToFirst();
-        //Convert bloob data into privateKey
         PrivateKey privateKey=null;
         try {
             KeyFactory kf = KeyFactory.getInstance("RSA");
@@ -73,23 +65,18 @@ public class Config extends SQLiteOpenHelper {
         return privateKey;
     }
 
-    //Method returns encrypt sent message with RSA private key
     public String sign(String msg){
         try {
-            //Create object for crypt
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.ENCRYPT_MODE, getPrivate());
-            //Convert encoded message into base64 format (for sending threw HTTP
             String sign = Base64.encodeToString(cipher.doFinal(msg.getBytes()), Base64.DEFAULT);
             return sign;
         }catch(Exception ex){}
         return null;
     }
 
-    //Get public Key string for veryfi sign
     public String getPublic(){
         try {
-            //Get data String from database
             SQLiteDatabase db =
                     this.getReadableDatabase();
             Cursor cursor =
@@ -106,19 +93,16 @@ public class Config extends SQLiteOpenHelper {
         return null;
     }
 
-    //Method recreate database with new keys
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS config");
         onCreate(db);
     }
 
-    //RSA key pair generation
     public static KeyPair generateKeys() {
         KeyPair keyPair = null;
         try {
             KeyPairGenerator keygen = KeyPairGenerator.getInstance("RSA");
-            //Set key length
             keygen.initialize(512);
             keyPair = keygen.generateKeyPair();
         } catch (NoSuchAlgorithmException e) {
