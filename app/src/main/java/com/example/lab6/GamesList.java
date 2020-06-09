@@ -97,8 +97,8 @@ public class GamesList extends AppCompatActivity {
         ProgressBar spinner = (ProgressBar)findViewById(R.id.progressBar1);
         spinner.setVisibility(View.VISIBLE);
 
-        Snackbar.make(findViewById(R.id.main_list), getString(R.string.refresh), Snackbar.LENGTH_SHORT)
-                .setAction("Action", null).show();
+//        Snackbar.make(findViewById(R.id.main_list), getString(R.string.refresh), Snackbar.LENGTH_SHORT)
+//               .setAction("Action", null).show();
 
 
         ListView list = (ListView)findViewById(R.id.listView);
