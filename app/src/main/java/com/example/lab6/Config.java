@@ -1,4 +1,5 @@
-package pl.antons.rsatest;
+package com.example.lab6;
+
 
 import android.content.ContentValues;
 import android.content.Context;
