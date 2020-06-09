@@ -7,7 +7,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import java.util.Arrays;
 
 
 public class inRowBoard extends BaseAdapter {
